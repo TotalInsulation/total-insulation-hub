@@ -8,6 +8,14 @@ export interface MonthlySummary {
   invoiceCount: number;
 }
 
+export interface MonthClaimDetail {
+  id: string;
+  projectName: string;
+  amount: number;
+  invoiceDate: string;
+  invoiceNumber: string | null;
+}
+
 export interface OverallTotals {
   totalQuotedValue: number;
   totalInvoicedToDate: number;
@@ -92,4 +100,25 @@ export function useMonthlySummary() {
   }, [fetchData]);
 
   return { months, overall, loading };
+}
+
+export async function fetchMonthClaimDetail(monthKey: string): Promise<MonthClaimDetail[]> {
+  const [year, month] = monthKey.split('-').map(Number);
+  const startDate = new Date(year, month - 1, 1).toISOString().slice(0, 10);
+  const endDate = new Date(year, month, 0).toISOString().slice(0, 10);
+
+  const { data } = await supabase
+    .from('invoice_entries')
+    .select('id, amount, invoice_date, invoice_number, wip_projects(project_name)')
+    .gte('invoice_date', startDate)
+    .lte('invoice_date', endDate)
+    .order('amount', { ascending: false });
+
+  return (data ?? []).map((row: any) => ({
+    id: row.id,
+    projectName: row.wip_projects?.project_name ?? 'Unknown project',
+    amount: row.amount,
+    invoiceDate: row.invoice_date,
+    invoiceNumber: row.invoice_number,
+  }));
 }

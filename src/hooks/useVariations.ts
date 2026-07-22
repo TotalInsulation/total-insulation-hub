@@ -11,7 +11,7 @@ export function useVariations(projectId?: string) {
     setError(null);
     let query = supabase
       .from('variations')
-      .select('*')
+      .select('*, wip_projects(project_name)')
       .order('submitted_date', { ascending: false });
 
     if (projectId) {
