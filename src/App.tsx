@@ -9,6 +9,7 @@ import BusinessHome from './pages/Business/BusinessHome';
 import MessagesHome from './pages/Team/Messages/MessagesHome';
 import TeamHome from './pages/Team/TeamHome';
 import CrewHome from './pages/Crew/CrewHome';
+import MoreHome from './pages/More/MoreHome';
 import { useModuleAccess } from './hooks/useModuleAccess';
 import './styles/global.css';
 
@@ -39,7 +40,7 @@ function AppShell() {
           {activeTab === 'business' && <BusinessHome />}
           {activeTab === 'crew' && <CrewHome />}
           {activeTab === 'team' && <TeamHome />}
-          {activeTab === 'more' && <ComingSoon moduleName="More" />}
+          {activeTab === 'more' && <MoreHome />}
         </>
       )}
 
