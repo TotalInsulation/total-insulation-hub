@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { isDeviceTrusted } from '../../lib/deviceTrust';
 import Login from './Login';
 import TwoFactorSetup from './TwoFactorSetup';
 import TwoFactorVerify from './TwoFactorVerify';
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
-  const { session, appUser, loading, isSuperAdmin, requires2fa, twoFaVerified } =
-    useAuth();
+  const {
+    session,
+    appUser,
+    loading,
+    isSuperAdmin,
+    requires2fa,
+    twoFaVerified,
+    markTwoFaVerified,
+  } = useAuth();
   const [checking2faEnrollment, setChecking2faEnrollment] = useState(true);
   const [has2faRow, setHas2faRow] = useState(false);
 
@@ -25,17 +33,28 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
         .eq('user_id', session.user.id)
         .maybeSingle();
 
-      if (mounted) {
-        setHas2faRow(Boolean(data?.enabled));
-        setChecking2faEnrollment(false);
+      if (!mounted) return;
+
+      const enabled = Boolean(data?.enabled);
+      setHas2faRow(enabled);
+
+      // If this device was verified within the last 24 hours, skip the
+      // 2FA prompt for this session automatically.
+      if (enabled) {
+        const trusted = await isDeviceTrusted(session.user.id);
+        if (trusted && mounted) {
+          markTwoFaVerified();
+        }
       }
+
+      setChecking2faEnrollment(false);
     }
 
     check();
     return () => {
       mounted = false;
     };
-  }, [session, isSuperAdmin, twoFaVerified]);
+  }, [session, isSuperAdmin, twoFaVerified, markTwoFaVerified]);
 
   if (loading || checking2faEnrollment) {
     return (

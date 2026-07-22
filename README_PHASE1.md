@@ -50,11 +50,22 @@ actual `id` values Supabase generates for each user — you can find these in
 Authentication > Users):
 
 ```sql
-insert into public.users (id, email, full_name, state, role) values
-  ('<jordan-uuid>', 'Jwallace@totalinsulation.com.au', 'Jordan Wallace', 'Office', 'super_admin'),
-  ('<nelson-uuid>', 'ntillman@totalinsulation.com.au', 'Nelson Tillman', 'Office', 'super_admin'),
-  ('<ben-uuid>', 'Bwallace@totalinsulation.com.au', 'Benjamin Wallace', 'Office', 'super_admin'),
-  ('<margie-uuid>', 'mvega@totalinsulation.com.au', 'Margie Vega', 'Office', 'super_admin');
+insert into public.users (id, email, full_name, state, role, is_owner) values
+  ('<jordan-uuid>', 'Jwallace@totalinsulation.com.au', 'Jordan Wallace', 'Office', 'super_admin', true),
+  ('<nelson-uuid>', 'ntillman@totalinsulation.com.au', 'Nelson Tillman', 'Office', 'super_admin', true),
+  ('<ben-uuid>', 'Bwallace@totalinsulation.com.au', 'Benjamin Wallace', 'Office', 'super_admin', false),
+  ('<margie-uuid>', 'mvega@totalinsulation.com.au', 'Margie Vega', 'Office', 'super_admin', false);
+```
+
+Jordan and Nelson are marked `is_owner = true`. Only owners can toggle which
+Hub modules (Business, Crew, More) Ben and Margie can see — this happens
+through the `module_permissions` table. A toggle screen for this will be
+built into the Settings page in a later phase; until then you can restrict a
+module manually, for example to hide Business from Margie:
+
+```sql
+insert into public.module_permissions (user_id, module_key, can_access, updated_by)
+values ('<margie-uuid>', 'business', false, '<jordan-uuid>');
 ```
 
 ### 3. Install dependencies

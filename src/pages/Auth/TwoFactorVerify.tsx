@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { verifyTotpCode } from '../../lib/twoFactor';
+import { trustThisDeviceFor24Hours } from '../../lib/deviceTrust';
 
 export default function TwoFactorVerify() {
   const { session, markTwoFaVerified } = useAuth();
@@ -46,19 +47,22 @@ export default function TwoFactorVerify() {
         })
         .eq('user_id', session!.user.id);
 
+      await trustThisDeviceFor24Hours(session!.user.id);
       setChecking(false);
       markTwoFaVerified();
       return;
     }
 
     const valid = verifyTotpCode(data.secret_base32, code);
-    setChecking(false);
 
     if (!valid) {
+      setChecking(false);
       setError('Incorrect code. Try again.');
       return;
     }
 
+    await trustThisDeviceFor24Hours(session!.user.id);
+    setChecking(false);
     markTwoFaVerified();
   }
 

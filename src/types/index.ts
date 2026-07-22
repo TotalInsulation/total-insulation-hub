@@ -10,7 +10,19 @@ export interface AppUser {
   phone: string | null;
   photo_url: string | null;
   active: boolean;
+  is_owner: boolean;
   created_at: string;
+  updated_at: string;
+}
+
+export type ModuleKey = 'business' | 'crew' | 'team_online_tracker' | 'more';
+
+export interface ModulePermission {
+  id: string;
+  user_id: string;
+  module_key: ModuleKey;
+  can_access: boolean;
+  updated_by: string | null;
   updated_at: string;
 }
 
