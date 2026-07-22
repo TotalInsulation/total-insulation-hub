@@ -79,6 +79,8 @@ export interface WipProject {
   project_manager: string | null;
   procore_link: string | null;
   onedrive_folder_link: string | null;
+  planned_headcount: number | null;
+  contract_start_date: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -88,7 +90,8 @@ export type VariationStatus = 'submitted' | 'approved' | 'rejected' | 'completed
 export interface Variation {
   id: string;
   variation_number: string | null;
-  project_id: string;
+  project_id: string | null;
+  unmatched_project_name: string | null;
   description: string;
   cost_impact: number | null;
   time_impact_days: number | null;
