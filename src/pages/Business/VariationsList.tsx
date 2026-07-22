@@ -65,11 +65,17 @@ export default function VariationsList() {
           const colors = STATUS_COLORS[v.status];
           return (
             <div key={v.id} className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                 <div style={{ fontWeight: 600, fontSize: 14 }}>{v.variation_number ?? 'Variation'}</div>
                 <span style={{ background: colors.bg, color: colors.text, fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6 }}>
                   {STATUS_LABELS[v.status]}
                 </span>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                {(v as any).wip_projects?.project_name ?? v.unmatched_project_name ?? 'Unknown project'}
+                {!v.project_id && (
+                  <span style={{ background: '#F0F0F0', color: '#666', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>UNLINKED</span>
+                )}
               </div>
               <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 8 }}>{v.description}</div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

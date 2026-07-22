@@ -1,8 +1,10 @@
 import React from 'react';
+import { FileText, Folder, Edit3, MessageCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardMetrics } from '../../hooks/useDashboardMetrics';
 import { useUrgentItems } from '../../hooks/useUrgentItems';
 import { useTeamStatus } from '../../hooks/useTeamStatus';
+import { navigateTo } from '../../lib/navigation';
 
 function formatCurrency(value: number): string {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
@@ -32,29 +34,67 @@ export default function HomePage() {
       )}
 
       <div className="metrics-grid">
-        <div className="metric-card">
+        <div className="metric-card" onClick={() => navigateTo('business', 'tenders')}>
           <div className="metric-number">
             {metrics.loading ? '—' : metrics.activeTendersCount}
           </div>
           <div className="metric-label">Active Tenders</div>
         </div>
-        <div className="metric-card">
+        <div className="metric-card" onClick={() => navigateTo('business', 'wip')}>
           <div className="metric-number">
             {metrics.loading ? '—' : metrics.wipProjectsCount}
           </div>
           <div className="metric-label">WIP Projects</div>
         </div>
-        <div className="metric-card">
+        <div className="metric-card" onClick={() => navigateTo('business', 'variations')}>
           <div className="metric-number">
             {metrics.loading ? '—' : metrics.pendingVariationsCount}
           </div>
           <div className="metric-label">Pending Variations</div>
         </div>
-        <div className="metric-card">
+        <div className="metric-card" onClick={() => navigateTo('business', 'monthly')}>
           <div className="metric-number">
             {metrics.loading ? '—' : formatCurrency(metrics.pipelineValue)}
           </div>
           <div className="metric-label">Pipeline Value</div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <div className="section-title">Quick actions</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          <button
+            onClick={() => navigateTo('business', 'tenders')}
+            className="card"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', border: '0.5px solid var(--color-border)', background: '#fff' }}
+          >
+            <FileText size={18} color="var(--color-primary)" />
+            <span style={{ fontSize: 12, fontWeight: 600 }}>New Tender</span>
+          </button>
+          <button
+            onClick={() => navigateTo('business', 'wip')}
+            className="card"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', border: '0.5px solid var(--color-border)', background: '#fff' }}
+          >
+            <Folder size={18} color="var(--color-primary)" />
+            <span style={{ fontSize: 12, fontWeight: 600 }}>New Project</span>
+          </button>
+          <button
+            onClick={() => navigateTo('team', 'tasks')}
+            className="card"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', border: '0.5px solid var(--color-border)', background: '#fff' }}
+          >
+            <Edit3 size={18} color="var(--color-primary)" />
+            <span style={{ fontSize: 12, fontWeight: 600 }}>New Task</span>
+          </button>
+          <button
+            onClick={() => navigateTo('team', 'messages')}
+            className="card"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', border: '0.5px solid var(--color-border)', background: '#fff' }}
+          >
+            <MessageCircle size={18} color="var(--color-primary)" />
+            <span style={{ fontSize: 12, fontWeight: 600 }}>Message Team</span>
+          </button>
         </div>
       </div>
 

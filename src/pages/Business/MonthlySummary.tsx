@@ -1,5 +1,6 @@
-import React from 'react';
-import { useMonthlySummary } from '../../hooks/useMonthlySummary';
+import React, { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useMonthlySummary, fetchMonthClaimDetail, MonthClaimDetail } from '../../hooks/useMonthlySummary';
 
 function formatMoney(value: number): string {
   return `$${value.toLocaleString('en-AU', { maximumFractionDigits: 0 })}`;
@@ -7,6 +8,21 @@ function formatMoney(value: number): string {
 
 export default function MonthlySummary() {
   const { months, overall, loading } = useMonthlySummary();
+  const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
+  const [detail, setDetail] = useState<MonthClaimDetail[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  async function toggleMonth(monthKey: string) {
+    if (expandedMonth === monthKey) {
+      setExpandedMonth(null);
+      return;
+    }
+    setExpandedMonth(monthKey);
+    setDetailLoading(true);
+    const rows = await fetchMonthClaimDetail(monthKey);
+    setDetail(rows);
+    setDetailLoading(false);
+  }
 
   return (
     <div className="app-content">
@@ -46,12 +62,51 @@ export default function MonthlySummary() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {months.map((m) => (
-          <div key={m.monthKey} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>{m.monthLabel}</div>
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{m.invoiceCount} invoice{m.invoiceCount === 1 ? '' : 's'}</div>
+          <div key={m.monthKey}>
+            <div
+              onClick={() => toggleMonth(m.monthKey)}
+              className="card"
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+            >
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{m.monthLabel}</div>
+                <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{m.invoiceCount} invoice{m.invoiceCount === 1 ? '' : 's'}</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 16, fontWeight: 700 }}>{formatMoney(m.claimedThisMonth)}</div>
+                {expandedMonth === m.monthKey ? <ChevronUp size={16} color="#999" /> : <ChevronDown size={16} color="#999" />}
+              </div>
             </div>
-            <div style={{ fontSize: 16, fontWeight: 700 }}>{formatMoney(m.claimedThisMonth)}</div>
+
+            {expandedMonth === m.monthKey && (
+              <div className="card" style={{ marginTop: 4, background: '#FAFAF8' }}>
+                {detailLoading && <div className="empty-state" style={{ padding: 8 }}>Loading…</div>}
+                {!detailLoading && detail.length === 0 && (
+                  <div className="empty-state" style={{ padding: 8 }}>No claims found.</div>
+                )}
+                {!detailLoading && detail.map((d, idx) => (
+                  <div
+                    key={d.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      paddingBottom: idx < detail.length - 1 ? 8 : 0,
+                      marginBottom: idx < detail.length - 1 ? 8 : 0,
+                      borderBottom: idx < detail.length - 1 ? '0.5px solid var(--color-border)' : 'none',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600 }}>{d.projectName}</div>
+                      <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
+                        {new Date(d.invoiceDate).toLocaleDateString('en-AU')}
+                        {d.invoiceNumber ? ` · ${d.invoiceNumber}` : ''}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{formatMoney(d.amount)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>

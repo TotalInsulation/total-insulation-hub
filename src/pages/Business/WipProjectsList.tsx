@@ -94,14 +94,14 @@ function InvoiceLog({ project }: { project: WipProject }) {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             type="number"
-            placeholder="Amount"
-            style={{ flex: 2, minWidth: 90, padding: '8px 10px', borderRadius: 6, border: '0.5px solid var(--color-border)', fontSize: 12 }}
+            placeholder="Amount claimed *"
+            style={{ flex: 2, minWidth: 110, padding: '8px 10px', borderRadius: 6, border: '0.5px solid var(--color-border)', fontSize: 12 }}
           />
           <input
             value={invoiceNumber}
             onChange={(e) => setInvoiceNumber(e.target.value)}
-            placeholder="Invoice #"
-            style={{ flex: 2, minWidth: 90, padding: '8px 10px', borderRadius: 6, border: '0.5px solid var(--color-border)', fontSize: 12 }}
+            placeholder="Invoice # (optional)"
+            style={{ flex: 2, minWidth: 110, padding: '8px 10px', borderRadius: 6, border: '0.5px solid var(--color-border)', fontSize: 12 }}
           />
           <input
             value={invoiceDate}
@@ -117,9 +117,57 @@ function InvoiceLog({ project }: { project: WipProject }) {
             <Plus size={16} />
           </button>
         </div>
+        <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 6 }}>
+          Invoice number is optional — enter just the amount to claim this month.
+        </div>
         {error && <div style={{ color: '#ae272b', fontSize: 11, marginTop: 8 }}>{error}</div>}
       </div>
     </>
+  );
+}
+
+function DatesEditor({ project }: { project: WipProject }) {
+  const { updateProject } = useWipProjects();
+  const [contractStart, setContractStart] = useState(project.contract_start_date ?? '');
+  const [siteStart, setSiteStart] = useState(project.start_date ?? '');
+  const [completion, setCompletion] = useState(project.planned_completion_date ?? '');
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    await updateProject(project.id, {
+      contract_start_date: contractStart || null,
+      start_date: siteStart || null,
+      planned_completion_date: completion || null,
+    });
+    setSaving(false);
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 16 }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 10 }}>Key dates</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div>
+          <label style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>Contract start</label>
+          <input type="date" value={contractStart} onChange={(e) => setContractStart(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '0.5px solid var(--color-border)', fontSize: 12 }} />
+        </div>
+        <div>
+          <label style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>Site start</label>
+          <input type="date" value={siteStart} onChange={(e) => setSiteStart(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '0.5px solid var(--color-border)', fontSize: 12 }} />
+        </div>
+        <div>
+          <label style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>Planned completion</label>
+          <input type="date" value={completion} onChange={(e) => setCompletion(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 6, border: '0.5px solid var(--color-border)', fontSize: 12 }} />
+        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{ marginTop: 4, background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+        >
+          {saving ? 'Saving…' : 'Save dates'}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -175,6 +223,8 @@ function ProjectDetail({ project, onBack }: { project: WipProject; onBack: () =>
       </div>
 
       <InvoiceLog project={project} />
+
+      <DatesEditor project={project} />
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {project.procore_link && (

@@ -1,17 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MessagesHome from './Messages/MessagesHome';
 import CalendarPage from './Calendar/CalendarPage';
 import TasksPage from './Tasks/TasksPage';
+import VideoCallPage from './VideoCallPage';
 
-type SubTab = 'messages' | 'calendar' | 'tasks';
+type SubTab = 'messages' | 'calendar' | 'tasks' | 'video';
+
+const SUBTAB_KEY = 'ti_hub_team_subtab';
 
 export default function TeamHome() {
-  const [subTab, setSubTab] = useState<SubTab>('messages');
+  const [subTab, setSubTab] = useState<SubTab>(() => {
+    const saved = sessionStorage.getItem(SUBTAB_KEY);
+    return (saved as SubTab) || 'messages';
+  });
+
+  useEffect(() => {
+    function handleNavigate(e: Event) {
+      const detail = (e as CustomEvent<{ tab: string; subTab?: string }>).detail;
+      if (detail.tab === 'team' && detail.subTab) {
+        setSubTab(detail.subTab as SubTab);
+      }
+    }
+    window.addEventListener('ti-navigate', handleNavigate);
+    return () => window.removeEventListener('ti-navigate', handleNavigate);
+  }, []);
+
+  function handleSubTabClick(tab: SubTab) {
+    setSubTab(tab);
+    sessionStorage.setItem(SUBTAB_KEY, tab);
+  }
 
   const tabs: { key: SubTab; label: string }[] = [
     { key: 'messages', label: 'Messages' },
     { key: 'calendar', label: 'Calendar' },
     { key: 'tasks', label: 'Tasks' },
+    { key: 'video', label: 'Video' },
   ];
 
   return (
@@ -20,7 +43,7 @@ export default function TeamHome() {
         {tabs.map((t) => (
           <button
             key={t.key}
-            onClick={() => setSubTab(t.key)}
+            onClick={() => handleSubTabClick(t.key)}
             style={{
               flex: 1,
               padding: '10px 4px',
@@ -41,6 +64,7 @@ export default function TeamHome() {
       {subTab === 'messages' && <MessagesHome />}
       {subTab === 'calendar' && <CalendarPage />}
       {subTab === 'tasks' && <TasksPage />}
+      {subTab === 'video' && <VideoCallPage />}
     </div>
   );
 }
