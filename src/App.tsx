@@ -7,6 +7,7 @@ import ComingSoon from './components/ComingSoon';
 import RestrictedModule from './components/RestrictedModule';
 import BusinessHome from './pages/Business/BusinessHome';
 import MessagesHome from './pages/Team/Messages/MessagesHome';
+import TeamHome from './pages/Team/TeamHome';
 import CrewHome from './pages/Crew/CrewHome';
 import { useModuleAccess } from './hooks/useModuleAccess';
 import './styles/global.css';
@@ -37,7 +38,7 @@ function AppShell() {
           {activeTab === 'onsite' && <ComingSoon moduleName="Onsite" />}
           {activeTab === 'business' && <BusinessHome />}
           {activeTab === 'crew' && <CrewHome />}
-          {activeTab === 'team' && <MessagesHome />}
+          {activeTab === 'team' && <TeamHome />}
           {activeTab === 'more' && <ComingSoon moduleName="More" />}
         </>
       )}
